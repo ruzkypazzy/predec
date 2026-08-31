@@ -21,7 +21,9 @@ must write ONE short paragraph (3-5 sentences) summarizing:
   2. Whether the dataset is safe to train a reward model on as-is
   3. A concrete next-step recommendation (reweight, reswap, filter, or accept)
 
-Tone: direct, technical, no hedging. Output strict JSON only.
+Tone: direct, technical, no hedging. Output strict JSON only with this exact
+schema:
+  {"recommendation": "<one paragraph as a single string>"}
 """
 
 
