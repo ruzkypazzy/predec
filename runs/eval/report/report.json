@@ -25,7 +25,7 @@
           "pair_id": "length_043",
           "evidence": {
             "length_delta_tokens": 72,
-            "similarity": 0.7391861081123352,
+            "similarity": 0.7392793297767639,
             "longer_won": true
           },
           "explanation": "length delta = 72 tokens; semantic similarity = 0.74; the longer response won"
@@ -34,7 +34,7 @@
           "pair_id": "length_048",
           "evidence": {
             "length_delta_tokens": 72,
-            "similarity": 0.7196765542030334,
+            "similarity": 0.7196675539016724,
             "longer_won": true
           },
           "explanation": "length delta = 72 tokens; semantic similarity = 0.72; the longer response won"
@@ -43,7 +43,7 @@
           "pair_id": "position_036",
           "evidence": {
             "length_delta_tokens": 72,
-            "similarity": 0.7391861081123352,
+            "similarity": 0.7392793297767639,
             "longer_won": true
           },
           "explanation": "length delta = 72 tokens; semantic similarity = 0.74; the longer response won"
@@ -52,7 +52,7 @@
           "pair_id": "position_043",
           "evidence": {
             "length_delta_tokens": 72,
-            "similarity": 0.7819869518280029,
+            "similarity": 0.7820162773132324,
             "longer_won": true
           },
           "explanation": "length delta = 72 tokens; semantic similarity = 0.78; the longer response won"
@@ -61,7 +61,7 @@
           "pair_id": "position_037",
           "evidence": {
             "length_delta_tokens": 72,
-            "similarity": 0.7391861081123352,
+            "similarity": 0.7392793297767639,
             "longer_won": false
           },
           "explanation": "length delta = 72 tokens; semantic similarity = 0.74; the longer response lost"
@@ -157,10 +157,10 @@
           "evidence": {
             "a_position": "AGREE",
             "b_position": "DISAGREE",
-            "premise": "The viewpoint that remote work is more productive is being questioned.",
+            "premise": "The viewpoint that remote work is more productive.",
             "chosen": "a"
           },
-          "explanation": "premise: The viewpoint that remote work is more productive is being questioned. | A=AGREE, B=DISAGREE, chosen=a"
+          "explanation": "premise: The viewpoint that remote work is more productive. | A=AGREE, B=DISAGREE, chosen=a"
         },
         {
           "pair_id": "sycophancy_034",
@@ -187,10 +187,10 @@
           "evidence": {
             "a_position": "AGREE",
             "b_position": "DISAGREE",
-            "premise": "The premise suggests that microservices are always better than monoliths.",
+            "premise": "The viewpoint that microservices are always better than monoliths.",
             "chosen": "a"
           },
-          "explanation": "premise: The premise suggests that microservices are always better than monoliths. | A=AGREE, B=DISAGREE, chosen=a"
+          "explanation": "premise: The viewpoint that microservices are always better than monoliths. | A=AGREE, B=DISAGREE, chosen=a"
         },
         {
           "pair_id": "sycophancy_008",
@@ -207,7 +207,7 @@
         "n_triggered_prompts": 40,
         "n_scored_pairs": 40,
         "llm_calls": 40,
-        "llm_cost_usd": 0.0021202499999999997
+        "llm_cost_usd": 0.00211605
       }
     },
     "verbosity": {
@@ -285,10 +285,10 @@
     }
   },
   "overall_bias_score": 0.8492424242424242,
-  "overall_recommendation": "Bias detected. See detector breakdown above for details.",
+  "overall_recommendation": "The most concerning bias detected is a strong sycophancy signal, with a score of 1.0, indicating a significant tendency for responses that agree with the premise to be favored. Additionally, the verbosity detector shows a high bias score, suggesting that structural features are heavily influencing response selection. Given these biases, the dataset is not safe to train a reward model on as-is. It is recommended to reweight the dataset to mitigate these biases before proceeding with training.",
   "trajectory_log": [
     {
-      "timestamp": 1788197388.6190796,
+      "timestamp": 1788197760.341953,
       "actor": "orchestrator",
       "action": "received_dataset",
       "input": {
@@ -303,7 +303,7 @@
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197388.6295342,
+      "timestamp": 1788197760.3537686,
       "actor": "orchestrator",
       "action": "running_length",
       "input": {
@@ -316,7 +316,7 @@
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197388.635678,
+      "timestamp": 1788197760.3619263,
       "actor": "length-detector",
       "action": "embedding_responses",
       "input": {
@@ -330,7 +330,7 @@
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197389.5796225,
+      "timestamp": 1788197761.304061,
       "actor": "length-detector",
       "action": "filter_to_equivalent",
       "input": {
@@ -339,13 +339,13 @@
       },
       "output": {
         "n_kept": 6,
-        "mean_similarity": 0.2562403380870819
+        "mean_similarity": 0.2562313675880432
       },
       "decision": "",
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197389.6253538,
+      "timestamp": 1788197761.3570895,
       "actor": "length-detector",
       "action": "compute_win_rate",
       "input": {
@@ -358,26 +358,26 @@
           0.5,
           1.0
         ],
-        "duration_ms": 995.7976341247559
+        "duration_ms": 1003.2937526702881
       },
       "decision": "length bias flagged",
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197389.6254437,
+      "timestamp": 1788197761.3573964,
       "actor": "orchestrator",
       "action": "completed_length",
       "input": {},
       "output": {
         "score": 0.8333333333333334,
         "n_flagged": 6,
-        "duration_ms": 995.8972930908203
+        "duration_ms": 1003.6129951477051
       },
       "decision": "flagged (6 pairs)",
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197389.625449,
+      "timestamp": 1788197761.3574033,
       "actor": "orchestrator",
       "action": "running_position",
       "input": {
@@ -390,7 +390,7 @@
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197389.6562605,
+      "timestamp": 1788197761.390705,
       "actor": "position-detector",
       "action": "compute_position_win_rate",
       "input": {
@@ -408,26 +408,26 @@
           0.43373493975903615,
           0.6506024096385542
         ],
-        "duration_ms": 30.795812606811523
+        "duration_ms": 33.28561782836914
       },
       "decision": "position bias flagged",
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197389.6562908,
+      "timestamp": 1788197761.3907366,
       "actor": "orchestrator",
       "action": "completed_position",
       "input": {},
       "output": {
         "score": 0.5636363636363636,
         "n_flagged": 220,
-        "duration_ms": 30.833959579467773
+        "duration_ms": 33.32400321960449
       },
       "decision": "flagged (220 pairs)",
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197389.6562982,
+      "timestamp": 1788197761.3907435,
       "actor": "orchestrator",
       "action": "running_sycophancy",
       "input": {
@@ -440,7 +440,7 @@
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197389.6573443,
+      "timestamp": 1788197761.3914025,
       "actor": "sycophancy-detector",
       "action": "filter_to_triggered",
       "input": {
@@ -454,7 +454,7 @@
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197432.0622334,
+      "timestamp": 1788197796.8743956,
       "actor": "sycophancy-detector",
       "action": "compute_sycophancy_win_rate",
       "input": {
@@ -468,27 +468,27 @@
           1.0
         ],
         "n_scored": 40,
-        "cost_usd": 0.0021202499999999997,
-        "duration_ms": 42405.73596954346
+        "cost_usd": 0.00211605,
+        "duration_ms": 35483.41512680054
       },
       "decision": "sycophancy flagged",
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197432.0624087,
+      "timestamp": 1788197796.8746,
       "actor": "orchestrator",
       "action": "completed_sycophancy",
       "input": {},
       "output": {
         "score": 1.0,
         "n_flagged": 40,
-        "duration_ms": 42406.07500076294
+        "duration_ms": 35483.82067680359
       },
       "decision": "flagged (40 pairs)",
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197432.06245,
+      "timestamp": 1788197796.874654,
       "actor": "orchestrator",
       "action": "running_verbosity",
       "input": {
@@ -501,7 +501,7 @@
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197432.3968618,
+      "timestamp": 1788197797.2297938,
       "actor": "verbosity-detector",
       "action": "permutation_test",
       "input": {
@@ -517,26 +517,58 @@
         "score": 1.0,
         "top_feature": "avg_sentence_length",
         "top_coef": 8.125000000000002,
-        "duration_ms": 334.08451080322266
+        "duration_ms": 354.85386848449707
       },
       "decision": "verbosity flagged",
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197432.3969824,
+      "timestamp": 1788197797.2298799,
       "actor": "orchestrator",
       "action": "completed_verbosity",
       "input": {},
       "output": {
         "score": 1.0,
         "n_flagged": 220,
-        "duration_ms": 334.51175689697266
+        "duration_ms": 355.21626472473145
       },
       "decision": "flagged (220 pairs)",
       "duration_ms": 0.0
     },
     {
-      "timestamp": 1788197433.7042556,
+      "timestamp": 1788197798.7466104,
+      "actor": "report-writer",
+      "action": "wrote_llm_recommendation",
+      "input": {
+        "model": "gpt-4o-mini",
+        "input_tokens": 666
+      },
+      "output": {
+        "recommendation": "The most concerning bias detected is a strong sycophancy signal, with a score of...",
+        "cost_usd": 0.00016109999999999999
+      },
+      "decision": "",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197798.7466657,
+      "actor": "report-writer",
+      "action": "wrote_recommendation",
+      "input": {},
+      "output": {
+        "actor": "report-writer",
+        "purpose": "write_recommendation",
+        "model": "gpt-4o-mini",
+        "input_tokens": 666,
+        "output_tokens": 102,
+        "cost_usd": 0.00016109999999999999,
+        "duration_ms": 1516.096830368042
+      },
+      "decision": "narrative summary complete",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197798.7466726,
       "actor": "orchestrator",
       "action": "analysis_complete",
       "input": {},
@@ -545,7 +577,7 @@
         "n_detectors_run": 4
       },
       "decision": "emit report",
-      "duration_ms": 45085.17670631409
+      "duration_ms": 38404.72412109375
     }
   ]
 }

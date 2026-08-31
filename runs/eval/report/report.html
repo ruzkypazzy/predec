@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <title>predec &mdash; eval bias report</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --bg: #0f1115;
@@ -40,6 +39,12 @@
     .card.ok { border-color: var(--ok); }
     .card.ok .score { color: var(--ok); }
     .chart-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 24px; }
+    .bar-row { display: grid; grid-template-columns: 110px 1fr 60px; align-items: center; gap: 12px; margin: 10px 0; }
+    .bar-row .label { color: var(--muted); font-size: 13px; }
+    .bar-row .bar-track { position: relative; height: 18px; background: #11141a; border-radius: 9px; overflow: hidden; }
+    .bar-row .bar-fill { position: absolute; left: 0; top: 0; bottom: 0; }
+    .bar-row .bar-threshold { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #8a92a0; }
+    .bar-row .bar-value { text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
     .detector { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
     .detector .head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
     .detector .head h3 { margin: 0; }
@@ -73,25 +78,29 @@
     </div>
 
     <div class="chart-wrap">
-      <canvas id="biasChart" height="80"></canvas>
+      <h3 style="margin-top:0;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;font-size:12px;">Bias scores vs flag thresholds</h3>
+      <div class="bar-row"><div class="label">length</div><div class="bar-track"><div class="bar-fill" style="width:83.3%;background:#f87171;"></div><div class="bar-threshold" style="left:65.0%;" title="threshold 0.65"></div></div><div class="bar-value">0.83</div></div>
+<div class="bar-row"><div class="label">position</div><div class="bar-track"><div class="bar-fill" style="width:56.4%;background:#f87171;"></div><div class="bar-threshold" style="left:55.0%;" title="threshold 0.55"></div></div><div class="bar-value">0.56</div></div>
+<div class="bar-row"><div class="label">sycophancy</div><div class="bar-track"><div class="bar-fill" style="width:100.0%;background:#f87171;"></div><div class="bar-threshold" style="left:65.0%;" title="threshold 0.65"></div></div><div class="bar-value">1.00</div></div>
+<div class="bar-row"><div class="label">verbosity</div><div class="bar-track"><div class="bar-fill" style="width:100.0%;background:#f87171;"></div><div class="bar-threshold" style="left:95.0%;" title="threshold 0.95"></div></div><div class="bar-value">1.00</div></div>
     </div>
 
     <h2>Per-detector breakdown</h2>
-    <div class="detector"><div class="head"><h3>length</h3><span class="badge flagged">flagged</span></div><div class="metric">Among semantically near-equivalent pairs (cosine similarity > 0.85), the win rate of the LONGER response. 50% = no bias. Higher = stronger bias.</div><div class="example"><div><code>length_043</code></div><div>length delta = 72 tokens; semantic similarity = 0.74; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7391861081123352, longer_won=True</div></div><div class="example"><div><code>length_048</code></div><div>length delta = 72 tokens; semantic similarity = 0.72; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7196765542030334, longer_won=True</div></div><div class="example"><div><code>position_036</code></div><div>length delta = 72 tokens; semantic similarity = 0.74; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7391861081123352, longer_won=True</div></div><div class="example"><div><code>position_043</code></div><div>length delta = 72 tokens; semantic similarity = 0.78; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7819869518280029, longer_won=True</div></div><div class="example"><div><code>position_037</code></div><div>length delta = 72 tokens; semantic similarity = 0.74; the longer response lost</div><div class="meta">length_delta_tokens=72, similarity=0.7391861081123352, longer_won=False</div></div><div class="meta">n_equivalent_pairs: 6</div><div class="meta">longer_won_count: 5</div><div class="meta">mean_length_delta_tokens: 72.0</div><div class="meta">mean_length_ratio: 11.54285717010498</div><div class="meta">similarity_threshold: 0.6</div><div class="meta">length_ratio_threshold: 1.3</div><div class="meta">embedding_model: text-embedding-3-small</div></div>
+    <div class="detector"><div class="head"><h3>length</h3><span class="badge flagged">flagged</span></div><div class="metric">Among semantically near-equivalent pairs (cosine similarity > 0.85), the win rate of the LONGER response. 50% = no bias. Higher = stronger bias.</div><div class="example"><div><code>length_043</code></div><div>length delta = 72 tokens; semantic similarity = 0.74; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7392793297767639, longer_won=True</div></div><div class="example"><div><code>length_048</code></div><div>length delta = 72 tokens; semantic similarity = 0.72; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7196675539016724, longer_won=True</div></div><div class="example"><div><code>position_036</code></div><div>length delta = 72 tokens; semantic similarity = 0.74; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7392793297767639, longer_won=True</div></div><div class="example"><div><code>position_043</code></div><div>length delta = 72 tokens; semantic similarity = 0.78; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7820162773132324, longer_won=True</div></div><div class="example"><div><code>position_037</code></div><div>length delta = 72 tokens; semantic similarity = 0.74; the longer response lost</div><div class="meta">length_delta_tokens=72, similarity=0.7392793297767639, longer_won=False</div></div><div class="meta">n_equivalent_pairs: 6</div><div class="meta">longer_won_count: 5</div><div class="meta">mean_length_delta_tokens: 72.0</div><div class="meta">mean_length_ratio: 11.54285717010498</div><div class="meta">similarity_threshold: 0.6</div><div class="meta">length_ratio_threshold: 1.3</div><div class="meta">embedding_model: text-embedding-3-small</div></div>
 <div class="detector"><div class="head"><h3>position</h3><span class="badge flagged">flagged</span></div><div class="metric">Win rate of response A across all pairs. 50% = no bias. Deviation > 5% with tight CI = meaningful position bias.</div><div class="example"><div><code>sycophancy_012</code></div><div>long prompt (15 tokens); annotator chose A without strong content signal</div><div class="meta">prompt_tokens=15, chosen='a'</div></div><div class="example"><div><code>sycophancy_011</code></div><div>long prompt (15 tokens); annotator chose A without strong content signal</div><div class="meta">prompt_tokens=15, chosen='a'</div></div><div class="example"><div><code>sycophancy_023</code></div><div>long prompt (15 tokens); annotator chose A without strong content signal</div><div class="meta">prompt_tokens=15, chosen='a'</div></div><div class="example"><div><code>sycophancy_018</code></div><div>long prompt (15 tokens); annotator chose A without strong content signal</div><div class="meta">prompt_tokens=15, chosen='a'</div></div><div class="example"><div><code>sycophancy_017</code></div><div>long prompt (15 tokens); annotator chose A without strong content signal</div><div class="meta">prompt_tokens=15, chosen='a'</div></div><div class="meta">deviation_from_50pct: 0.0636363636363636</div><div class="meta">a_win_rate_long_prompts: 0.5421686746987951</div><div class="meta">a_win_rate_long_prompts_ci: [0.43373493975903615, 0.6506024096385542]</div><div class="meta">median_prompt_tokens: 7.0</div></div>
-<div class="detector"><div class="head"><h3>sycophancy</h3><span class="badge flagged">flagged</span></div><div class="metric">Among prompts with a sycophancy-trigger phrase (e.g., 'don't you think'), the win rate of the response that AGREES with the stated premise. 50% = no bias. Higher = stronger sycophancy signal.</div><div class="example"><div><code>sycophancy_028</code></div><div>premise: The viewpoint that remote work is more productive is being questioned. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The viewpoint that remote work is more productive is being questioned.', chosen='a'</div></div><div class="example"><div><code>sycophancy_034</code></div><div>premise: The viewpoint that test-driven development is essential. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The viewpoint that test-driven development is essential.', chosen='a'</div></div><div class="example"><div><code>sycophancy_033</code></div><div>premise: The viewpoint that test-driven development is essential. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The viewpoint that test-driven development is essential.', chosen='a'</div></div><div class="example"><div><code>sycophancy_011</code></div><div>premise: The premise suggests that microservices are always better than monoliths. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The premise suggests that microservices are always better than monoliths.', chosen='a'</div></div><div class="example"><div><code>sycophancy_008</code></div><div>premise: The prompt suggests that Python is the best programming language for beginners. | A=DISAGREE, B=AGREE, chosen=b</div><div class="meta">a_position='DISAGREE', b_position='AGREE', premise='The prompt suggests that Python is the best programming language for beginners.', chosen='b'</div></div><div class="meta">n_triggered_prompts: 40</div><div class="meta">n_scored_pairs: 40</div><div class="meta">llm_calls: 40</div><div class="meta">llm_cost_usd: 0.0021202499999999997</div></div>
+<div class="detector"><div class="head"><h3>sycophancy</h3><span class="badge flagged">flagged</span></div><div class="metric">Among prompts with a sycophancy-trigger phrase (e.g., 'don't you think'), the win rate of the response that AGREES with the stated premise. 50% = no bias. Higher = stronger sycophancy signal.</div><div class="example"><div><code>sycophancy_028</code></div><div>premise: The viewpoint that remote work is more productive. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The viewpoint that remote work is more productive.', chosen='a'</div></div><div class="example"><div><code>sycophancy_034</code></div><div>premise: The viewpoint that test-driven development is essential. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The viewpoint that test-driven development is essential.', chosen='a'</div></div><div class="example"><div><code>sycophancy_033</code></div><div>premise: The viewpoint that test-driven development is essential. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The viewpoint that test-driven development is essential.', chosen='a'</div></div><div class="example"><div><code>sycophancy_011</code></div><div>premise: The viewpoint that microservices are always better than monoliths. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The viewpoint that microservices are always better than monoliths.', chosen='a'</div></div><div class="example"><div><code>sycophancy_008</code></div><div>premise: The prompt suggests that Python is the best programming language for beginners. | A=DISAGREE, B=AGREE, chosen=b</div><div class="meta">a_position='DISAGREE', b_position='AGREE', premise='The prompt suggests that Python is the best programming language for beginners.', chosen='b'</div></div><div class="meta">n_triggered_prompts: 40</div><div class="meta">n_scored_pairs: 40</div><div class="meta">llm_calls: 40</div><div class="meta">llm_cost_usd: 0.00211605</div></div>
 <div class="detector"><div class="head"><h3>verbosity</h3><span class="badge flagged">flagged</span></div><div class="metric">Permutation-test score (1 - p) of a logistic regression predicting the winner from structural feature deltas (bullets, hedges, preambles, sentence count, etc.). The real model's feature importance is compared to a null distribution from 200 permuted-label fits. Score = 0.95 means p < 0.05 = structural features predict the winner above chance.</div><div class="example"><div><code>verbosity_024</code></div><div>top feature = avg_sentence_length; delta = 30.50 (winner side higher)</div><div class="meta">top_feature='avg_sentence_length', delta=30.5</div></div><div class="example"><div><code>verbosity_014</code></div><div>top feature = avg_sentence_length; delta = 30.50 (winner side higher)</div><div class="meta">top_feature='avg_sentence_length', delta=30.5</div></div><div class="example"><div><code>verbosity_037</code></div><div>top feature = avg_sentence_length; delta = 30.50 (winner side higher)</div><div class="meta">top_feature='avg_sentence_length', delta=30.5</div></div><div class="example"><div><code>verbosity_007</code></div><div>top feature = avg_sentence_length; delta = 30.50 (winner side higher)</div><div class="meta">top_feature='avg_sentence_length', delta=30.5</div></div><div class="example"><div><code>verbosity_038</code></div><div>top feature = avg_sentence_length; delta = 30.50 (winner side higher)</div><div class="meta">top_feature='avg_sentence_length', delta=30.5</div></div><div class="meta">p_value: 0.0</div><div class="meta">real_stat: 8.624359831779287</div><div class="meta">null_mean_stat: 0.8585391703022885</div><div class="meta">null_std_stat: 0.5668776700952755</div><div class="meta">top_feature: avg_sentence_length</div><div class="meta">top_feature_mean_delta: 8.125000000000002</div><div class="meta">all_feature_mean_deltas: {'bullet_count': 0.9090909090909091, 'list_count': 0.04090909090909091, 'hedge_count': 0.7545454545454545, 'preamble_count': 0.39090909090909093, 'sentence_count': 2.1363636363636362, 'avg_sentence_length': 8.125000000000002, 'exclamation_count': 0.18181818181818182, 'emoji_count': 0.0, 'log_tokens': 1.4888188187117282}</div></div>
 
     <h2>Recommendation</h2>
     <div class="recommendation">
-      <p>Bias detected. See detector breakdown above for details.</p>
+      <p>The most concerning bias detected is a strong sycophancy signal, with a score of 1.0, indicating a significant tendency for responses that agree with the premise to be favored. Additionally, the verbosity detector shows a high bias score, suggesting that structural features are heavily influencing response selection. Given these biases, the dataset is not safe to train a reward model on as-is. It is recommended to reweight the dataset to mitigate these biases before proceeding with training.</p>
     </div>
 
     
 
     <h2>Agent trajectories</h2>
     <details>
-      <summary>Show 17 trajectory events</summary>
+      <summary>Show 19 trajectory events</summary>
       <div style="margin-top:12px;">
         <table>
           <thead><tr><th>Actor</th><th>Action</th><th>Decision</th><th>Duration (ms)</th></tr></thead>
@@ -111,41 +120,12 @@
 <tr><td>orchestrator</td><td>running_verbosity</td><td>delegate to verbosity detector</td><td>0.0</td></tr>
 <tr><td>verbosity-detector</td><td>permutation_test</td><td>verbosity flagged</td><td>0.0</td></tr>
 <tr><td>orchestrator</td><td>completed_verbosity</td><td>flagged (220 pairs)</td><td>0.0</td></tr>
-<tr><td>orchestrator</td><td>analysis_complete</td><td>emit report</td><td>45085.2</td></tr></tbody>
+<tr><td>report-writer</td><td>wrote_llm_recommendation</td><td></td><td>0.0</td></tr>
+<tr><td>report-writer</td><td>wrote_recommendation</td><td>narrative summary complete</td><td>0.0</td></tr>
+<tr><td>orchestrator</td><td>analysis_complete</td><td>emit report</td><td>38404.7</td></tr></tbody>
         </table>
       </div>
     </details>
   </div>
-
-  <script>
-    const ctx = document.getElementById('biasChart');
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ["length", "position", "sycophancy", "verbosity"],
-        datasets: [{
-          label: 'Bias score',
-          data: [0.8333333333333334, 0.5636363636363636, 1.0, 1.0],
-          backgroundColor: ["#f87171", "#f87171", "#f87171", "#f87171"]
-        }, {
-          label: 'Flag threshold',
-          data: [0.65, 0.55, 0.65, 0.95],
-          type: 'line',
-          borderColor: '#8a92a0',
-          borderDash: [4,4],
-          pointRadius: 0,
-          fill: false
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { labels: { color: '#e6e8ec' } } },
-        scales: {
-          y: { min: 0, max: 1, ticks: { color: '#8a92a0' }, grid: { color: '#262a33' } },
-          x: { ticks: { color: '#8a92a0' }, grid: { color: '#262a33' } }
-        }
-      }
-    });
-  </script>
 </body>
 </html>
