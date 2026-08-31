@@ -124,12 +124,11 @@ class VerbosityDetector(BaseDetector):
         # flipping the sign of random subsets of rows should give
         # statistics distributed around 0. A real bias shows up as a
         # non-zero mean vector.
-        mu = X.mean(axis=0)
-        sd = X.std(axis=0) + 1e-9
-        X_std = (X - mu) / sd
+        # NOTE: we do NOT standardize X here — standardization by
+        # construction would zero out the test statistic.
 
         # Real test statistic: L2 norm of the mean vector
-        mean_vec = X_std.mean(axis=0)
+        mean_vec = X.mean(axis=0)
         real_stat = float(np.linalg.norm(mean_vec))
 
         # Permutation null: flip the sign of random subsets of rows
@@ -138,7 +137,7 @@ class VerbosityDetector(BaseDetector):
         null_stats = np.empty(n_perm, dtype=np.float64)
         for i in range(n_perm):
             signs = rng.choice([-1.0, 1.0], size=n)
-            X_perm = X_std * signs[:, None]
+            X_perm = X * signs[:, None]
             null_stats[i] = float(np.linalg.norm(X_perm.mean(axis=0)))
         p_value = float((null_stats >= real_stat).mean())
         # Score: 1 - p. Higher = stronger verbosity bias.
