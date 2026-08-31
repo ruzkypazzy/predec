@@ -22,7 +22,6 @@ import time
 
 import numpy as np
 import tiktoken
-from sklearn.linear_model import LogisticRegression
 
 from ..schema import DetectorResult, FlaggedExample, PreferencePair
 from . import BaseDetector
@@ -118,47 +117,38 @@ class VerbosityDetector(BaseDetector):
         X[win_idx == 1] = -X[win_idx == 1]
         y = np.ones(n, dtype=np.int8)
 
-        # Step 3: fit LR — use a permutation test instead of CV-AUC.
-        # With y = ones (constant), AUC is undefined. The right question
-        # is: do the structural features predict the WINNER's side
-        # better than chance? We compare the real model's mean feature
-        # importance to a null distribution from permuted-label fits.
-        from sklearn.model_selection import KFold
-
+        # Step 3: use a permutation test on the L1 norm of standardized
+        # feature deltas. This is a paired test (no y needed): the null
+        # hypothesis is that the winner's side has the same mean feature
+        # vector as the loser's. We compute the observed L1 norm of the
+        # mean delta and compare to a null built by flipping the sign of
+        # random subsets of rows.
         mu = X.mean(axis=0)
         sd = X.std(axis=0) + 1e-9
         X_std = (X - mu) / sd
 
-        # Real fit
-        real_model = LogisticRegression(max_iter=200, C=1.0)
-        real_model.fit(X_std, y)
-        real_coefs = real_model.coef_[0]
-        real_importance = float(np.linalg.norm(real_coefs))
+        # Real test statistic: mean absolute standardized feature delta
+        real_stat = float(np.mean(np.abs(X_std)))
 
-        # Permutation null
+        # Permutation null: flip the sign of random subsets of rows.
+        # This breaks any consistent directionality between "winner side"
+        # and feature values while preserving the per-pair magnitude.
         rng = np.random.default_rng(42)
-        n_perm = 200
-        null_importances = np.empty(n_perm, dtype=np.float64)
-        # For the null, shuffle y across rows (which decouples features from labels)
-        y_null_base = y.copy()
+        n_perm = 500
+        null_stats = np.empty(n_perm, dtype=np.float64)
         for i in range(n_perm):
-            y_null = rng.permutation(y_null_base)
-            perm_model = LogisticRegression(max_iter=200, C=1.0)
-            try:
-                perm_model.fit(X_std, y_null)
-                null_importances[i] = float(np.linalg.norm(perm_model.coef_[0]))
-            except Exception:
-                null_importances[i] = 0.0
-
-        # p-value: fraction of null importances >= real importance
-        p_value = float((null_importances >= real_importance).mean())
-        # Convert to a "score" in [0, 1]: 1 - p. Higher = more bias.
+            signs = rng.choice([-1.0, 1.0], size=n)
+            X_perm = X_std * signs[:, None]
+            null_stats[i] = float(np.mean(np.abs(X_perm)))
+        p_value = float((null_stats >= real_stat).mean())
+        # Score: 1 - p. Higher = stronger verbosity bias.
         score = 1.0 - p_value
 
-        # Step 4: top feature from real fit
-        top_idx = int(np.argmax(np.abs(real_coefs)))
+        # Step 4: top feature (by mean absolute delta on real data)
+        mean_abs = np.abs(X_std).mean(axis=0)
+        top_idx = int(np.argmax(mean_abs))
         top_feature = FEATURE_NAMES[top_idx]
-        top_coef = float(real_coefs[top_idx])
+        top_coef = float(np.mean(X_std[:, top_idx]))  # mean signed delta
 
         # Step 5: examples — pairs where the top feature delta is largest
         top_col = X[:, top_idx]
@@ -186,9 +176,9 @@ class VerbosityDetector(BaseDetector):
             "permutation_test",
             {"n_pairs": n, "n_features": len(FEATURE_NAMES), "n_perm": n_perm},
             {
-                "real_importance": real_importance,
-                "null_mean": float(null_importances.mean()),
-                "null_std": float(null_importances.std()),
+                "real_stat": real_stat,
+                "null_mean": float(null_stats.mean()),
+                "null_std": float(null_stats.std()),
                 "p_value": p_value,
                 "score": score,
                 "top_feature": top_feature,
@@ -208,11 +198,13 @@ class VerbosityDetector(BaseDetector):
             examples=examples,
             extra={
                 "p_value": p_value,
-                "real_importance": real_importance,
-                "null_mean_importance": float(null_importances.mean()),
-                "null_std_importance": float(null_importances.std()),
+                "real_stat": real_stat,
+                "null_mean_stat": float(null_stats.mean()),
+                "null_std_stat": float(null_stats.std()),
                 "top_feature": top_feature,
-                "top_feature_coef": top_coef,
-                "all_coefs": {f: float(c) for f, c in zip(FEATURE_NAMES, real_coefs)},
+                "top_feature_mean_delta": top_coef,
+                "all_feature_mean_deltas": {
+                    f: float(np.mean(X_std[:, i])) for i, f in enumerate(FEATURE_NAMES)
+                },
             },
         )
