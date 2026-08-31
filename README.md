@@ -14,7 +14,7 @@ The tool also emits a debiased version of the dataset (reweight, reswap, or filt
 ## Install
 
 ```bash
-git clone https://github.com/<OWNER>/predec.git
+git clone https://github.com/ruzkypazzy/predec.git
 cd predec
 pip install -e .
 ```
