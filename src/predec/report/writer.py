@@ -53,13 +53,13 @@ def write_recommendation(
         if worst_name == "position":
             fallback = (
                 f"Position bias detected: A's win rate is {worst.score:.2f} (CI {worst.confidence_interval[0]:.2f}-{worst.confidence_interval[1]:.2f}), "
-                f"significantly above 0.50. Recommendation: run \`predec debias --strategy reswap\` "
+                f"significantly above 0.50. Recommendation: run `predec debias --strategy reswap` "
                 f"to randomize A/B ordering, then re-run to confirm."
             )
         elif worst_name == "length":
             fallback = (
                 f"Length bias detected: among semantically-equivalent pairs, the longer response wins "
-                f"{worst.score:.2f} of the time. Recommendation: run \`predec debias --strategy reweight\` "
+                f"{worst.score:.2f} of the time. Recommendation: run `predec debias --strategy reweight` "
                 f"to down-weight length-flagged examples, or filter the most extreme cases."
             )
         elif worst_name == "sycophancy":

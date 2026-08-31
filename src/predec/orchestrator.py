@@ -117,7 +117,7 @@ def run_analysis(
             },
             decision=(
                 f"flagged ({result.n_pairs_flagged} pairs)"
-                if result.score >= result.flag_threshold
+                if result.score >= result.threshold
                 else "within tolerance"
             ),
         )
@@ -125,7 +125,7 @@ def run_analysis(
     # Overall score: weighted mean of detector scores that exceeded their
     # threshold, otherwise the max score across detectors.
     flagged_scores = [
-        r.score for r in results.values() if r.score >= r.flag_threshold
+        r.score for r in results.values() if r.score >= r.threshold
     ]
     if flagged_scores:
         overall = float(np.mean(flagged_scores))
