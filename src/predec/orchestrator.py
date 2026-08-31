@@ -189,7 +189,9 @@ def baseline_one_prompt(
     )
     system = (
         "You are an analyst reviewing a preference dataset. Identify any biases "
-        "you observe. For each bias, give a score from 0 to 1 and 3 example pairs."
+        "you observe. For each bias, give a score from 0 to 1 and 3 example pairs. "
+        "Return strict JSON with a 'biases' field containing entries for length, "
+        "position, sycophancy, and verbosity, each with a 'score' (0-1) and 'examples' array."
     )
     user = f"Dataset: {dataset_name}\n\n{sample_text}\n\nIdentify biases."
     t0 = time.time()

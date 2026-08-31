@@ -89,7 +89,7 @@ def detect(
     table.add_column("Score", justify="right")
     table.add_column("Status")
     for name_, d in report.detectors.items():
-        status = "[red]flagged[/red]" if d.score >= d.flag_threshold else "[green]ok[/green]"
+        status = "[red]flagged[/red]" if d.score >= d.threshold else "[green]ok[/green]"
         table.add_row(name_, f"{d.score:.3f}", status)
     table.add_row("[bold]overall[/bold]", f"{report.overall_bias_score:.3f}", "")
     console.print(table)
