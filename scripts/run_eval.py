@@ -52,7 +52,7 @@ def _baseline_parse_baseline_scores(text: str) -> dict[str, float]:
 def evaluate_agent(pairs: list[PreferencePair], llm: LLMClient) -> dict:
     """Run the agent and extract per-bias flags."""
     report = run_analysis(pairs, dataset_name="eval", dataset_source="synthetic", llm=llm)
-    flags = {name: r.score >= r.flag_threshold for name, r in report.detectors.items()}
+    flags = {name: r.score >= r.threshold for name, r in report.detectors.items()}
     return {
         "flags": flags,
         "scores": {name: r.score for name, r in report.detectors.items()},
