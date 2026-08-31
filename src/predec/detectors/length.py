@@ -40,13 +40,15 @@ class LengthDetector(BaseDetector):
 
     def __init__(
         self,
-        similarity_threshold: float = 0.85,
+        similarity_threshold: float = 0.6,
+        length_ratio_threshold: float = 1.3,
         embedding_model: str = "text-embedding-3-small",
         openai_client: Any | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self.similarity_threshold = similarity_threshold
+        self.length_ratio_threshold = length_ratio_threshold
         self.embedding_model = embedding_model
         self._openai = openai_client
         self._tokenizer = tiktoken.encoding_for_model("gpt-4o-mini")
@@ -124,6 +126,7 @@ class LengthDetector(BaseDetector):
         # Step 3: compute similarity and longer-won flags
         sims = np.zeros(n, dtype=np.float32)
         longer_won = np.zeros(n, dtype=np.int8)
+        length_ratio = np.ones(n, dtype=np.float32)
         chosen_text_a: list[str] = []
         for i, p in enumerate(pairs):
             va = self._cache[p.response_a]
@@ -140,9 +143,17 @@ class LengthDetector(BaseDetector):
             elif p.chosen == "b" and longer_is_b:
                 longer_won[i] = 1
             chosen_text_a.append(longer_response)
+            # Compute length ratio (max/min)
+            shorter, longer = min(tokens_a[i], tokens_b[i]), max(tokens_a[i], tokens_b[i])
+            length_ratio[i] = longer / max(1, shorter)
 
-        # Step 4: filter to semantically equivalent pairs
-        keep = (sims >= self.similarity_threshold) & (longer_won >= 0)
+        # Step 4: filter to semantically equivalent pairs (cosine sim above threshold)
+        # AND pairs with a substantial length delta (>= length_ratio_threshold)
+        keep = (
+            (sims >= self.similarity_threshold)
+            & (longer_won >= 0)
+            & (length_ratio >= self.length_ratio_threshold)
+        )
         n_kept = int(keep.sum())
         self._log(
             "filter_to_equivalent",
@@ -209,6 +220,9 @@ class LengthDetector(BaseDetector):
                 "n_equivalent_pairs": n_kept,
                 "longer_won_count": int(win_rates.sum()),
                 "mean_length_delta_tokens": float(length_delta[keep].mean()) if n_kept else 0.0,
+                "mean_length_ratio": float(length_ratio[keep].mean()) if n_kept else 0.0,
+                "similarity_threshold": self.similarity_threshold,
+                "length_ratio_threshold": self.length_ratio_threshold,
                 "embedding_model": self.embedding_model,
             },
         )

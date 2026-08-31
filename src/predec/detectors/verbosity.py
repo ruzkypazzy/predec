@@ -23,7 +23,6 @@ import time
 import numpy as np
 import tiktoken
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score
 
 from ..schema import DetectorResult, FlaggedExample, PreferencePair
 from . import BaseDetector
@@ -75,12 +74,14 @@ FEATURE_NAMES = list(_features("", tiktoken.encoding_for_model("gpt-4o-mini")).k
 class VerbosityDetector(BaseDetector):
     name = "verbosity"
     metric_description = (
-        "Cross-val AUC of a logistic regression predicting the winner from "
-        "structural feature deltas (bullets, hedges, preambles, sentence count, "
-        "etc.). AUC = 0.5 = no signal. AUC > 0.55 = verbosity bias."
+        "Permutation-test score (1 - p) of a logistic regression predicting the "
+        "winner from structural feature deltas (bullets, hedges, preambles, sentence "
+        "count, etc.). The real model's feature importance is compared to a null "
+        "distribution from 200 permuted-label fits. Score = 0.95 means p < 0.05 = "
+        "structural features predict the winner above chance."
     )
     uses_llm = False
-    flag_threshold = 0.55  # AUC threshold
+    flag_threshold = 0.95  # permutation p-value: score = 1 - p; flag if p < 0.05
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -117,41 +118,47 @@ class VerbosityDetector(BaseDetector):
         X[win_idx == 1] = -X[win_idx == 1]
         y = np.ones(n, dtype=np.int8)
 
-        # Step 3: fit LR
-        # Standardize features
+        # Step 3: fit LR — use a permutation test instead of CV-AUC.
+        # With y = ones (constant), AUC is undefined. The right question
+        # is: do the structural features predict the WINNER's side
+        # better than chance? We compare the real model's mean feature
+        # importance to a null distribution from permuted-label fits.
+        from sklearn.model_selection import KFold
+
         mu = X.mean(axis=0)
         sd = X.std(axis=0) + 1e-9
         X_std = (X - mu) / sd
 
-        # 5-fold CV (stratification not possible since y is constant; use plain KFold)
-        from sklearn.model_selection import KFold
+        # Real fit
+        real_model = LogisticRegression(max_iter=200, C=1.0)
+        real_model.fit(X_std, y)
+        real_coefs = real_model.coef_[0]
+        real_importance = float(np.linalg.norm(real_coefs))
 
-        kf = KFold(n_splits=min(5, n // 5 + 1), shuffle=True, random_state=42)
-        model = LogisticRegression(max_iter=200, C=1.0)
-        # Note: y is all ones, so AUC will measure how well the model can
-        # predict a held-out positive example based on the magnitude of
-        # feature deltas alone. With a dummy baseline, this AUC being
-        # meaningfully > 0.5 indicates the model has learned something.
-        try:
-            scores = cross_val_score(model, X_std, y, cv=kf, scoring="roc_auc")
-            auc = float(np.mean(scores))
-        except Exception as e:
-            return DetectorResult(
-                name=self.name,
-                score=0.5,
-                confidence_interval=(0.0, 0.0),
-                n_pairs_analyzed=n,
-                n_pairs_flagged=0,
-                metric_description=self.metric_description,
-                extra={"error": str(e)},
-            )
+        # Permutation null
+        rng = np.random.default_rng(42)
+        n_perm = 200
+        null_importances = np.empty(n_perm, dtype=np.float64)
+        # For the null, shuffle y across rows (which decouples features from labels)
+        y_null_base = y.copy()
+        for i in range(n_perm):
+            y_null = rng.permutation(y_null_base)
+            perm_model = LogisticRegression(max_iter=200, C=1.0)
+            try:
+                perm_model.fit(X_std, y_null)
+                null_importances[i] = float(np.linalg.norm(perm_model.coef_[0]))
+            except Exception:
+                null_importances[i] = 0.0
 
-        # Step 4: fit on all data to identify the top feature
-        model.fit(X_std, y)
-        coefs = model.coef_[0]
-        top_idx = int(np.argmax(np.abs(coefs)))
+        # p-value: fraction of null importances >= real importance
+        p_value = float((null_importances >= real_importance).mean())
+        # Convert to a "score" in [0, 1]: 1 - p. Higher = more bias.
+        score = 1.0 - p_value
+
+        # Step 4: top feature from real fit
+        top_idx = int(np.argmax(np.abs(real_coefs)))
         top_feature = FEATURE_NAMES[top_idx]
-        top_coef = float(coefs[top_idx])
+        top_coef = float(real_coefs[top_idx])
 
         # Step 5: examples — pairs where the top feature delta is largest
         top_col = X[:, top_idx]
@@ -172,13 +179,18 @@ class VerbosityDetector(BaseDetector):
                 )
             )
 
-        flagged = auc >= self.flag_threshold
+        # Flag if p-value < 0.05 (i.e., score > 0.95)
+        flagged = score >= 0.95
         dt = (time.time() - t0) * 1000
         self._log(
-            "fit_logistic_regression",
-            {"n_pairs": n, "n_features": len(FEATURE_NAMES)},
+            "permutation_test",
+            {"n_pairs": n, "n_features": len(FEATURE_NAMES), "n_perm": n_perm},
             {
-                "auc": auc,
+                "real_importance": real_importance,
+                "null_mean": float(null_importances.mean()),
+                "null_std": float(null_importances.std()),
+                "p_value": p_value,
+                "score": score,
                 "top_feature": top_feature,
                 "top_coef": top_coef,
                 "duration_ms": dt,
@@ -188,16 +200,19 @@ class VerbosityDetector(BaseDetector):
 
         return DetectorResult(
             name=self.name,
-            score=auc,
-            confidence_interval=(0.0, 0.0),  # CV doesn't give us a clean CI for AUC
+            score=score,
+            confidence_interval=(0.0, 0.0),  # permutation test doesn't give a clean CI
             n_pairs_analyzed=n,
             n_pairs_flagged=n if flagged else 0,
             metric_description=self.metric_description,
             examples=examples,
             extra={
-                "auc_cv_std": float(np.std(scores)) if "scores" in dir() else 0.0,
+                "p_value": p_value,
+                "real_importance": real_importance,
+                "null_mean_importance": float(null_importances.mean()),
+                "null_std_importance": float(null_importances.std()),
                 "top_feature": top_feature,
                 "top_feature_coef": top_coef,
-                "all_coefs": {f: float(c) for f, c in zip(FEATURE_NAMES, coefs)},
+                "all_coefs": {f: float(c) for f, c in zip(FEATURE_NAMES, real_coefs)},
             },
         )
