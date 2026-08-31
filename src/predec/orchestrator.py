@@ -104,6 +104,7 @@ def run_analysis(
             )
             continue
         result.duration_ms = (time.time() - t_d) * 1000
+        result.threshold = det.flag_threshold
         results[det.name] = result
         log.record(
             actor="orchestrator",

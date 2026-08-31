@@ -155,9 +155,9 @@ _HTML_TEMPLATE = """<!doctype html>
 """
 
 
-def _format_score(det) -> tuple[str, str]:
+def _format_score(det, threshold: float) -> tuple[str, str]:
     """Return (card_class, badge_html) for a detector result."""
-    flagged = det.score >= det.flag_threshold
+    flagged = det.score >= threshold
     return ("flagged" if flagged else "ok"), (
         '<span class="badge flagged">flagged</span>' if flagged else '<span class="badge ok">within tolerance</span>'
     )
@@ -180,7 +180,7 @@ def render_html(report: AnalysisReport, debiased_path: str | None = None) -> str
         if name not in dets:
             continue
         d = dets[name]
-        cls, _ = _format_score(d)
+        cls, _ = _format_score(d, d.threshold)
         ci = _ci_str(d.confidence_interval)
         cards.append(
             f'<div class="card {cls}">'
@@ -193,16 +193,16 @@ def render_html(report: AnalysisReport, debiased_path: str | None = None) -> str
     # Chart data
     chart_labels = list(dets.keys())
     chart_values = [float(dets[k].score) for k in chart_labels]
-    chart_thresholds = [float(dets[k].flag_threshold) for k in chart_labels]
+    chart_thresholds = [float(dets[k].threshold) for k in chart_labels]
     chart_colors = [
-        "#f87171" if dets[k].score >= dets[k].flag_threshold else "#34d399"
+        "#f87171" if dets[k].score >= dets[k].threshold else "#34d399"
         for k in chart_labels
     ]
 
     # Per-detector sections
     sections = []
     for name, d in dets.items():
-        cls, badge = _format_score(d)
+        cls, badge = _format_score(d, d.threshold)
         examples_html = ""
         for ex in d.examples[:5]:
             evidence = ", ".join(f"{k}={v!r}" for k, v in ex.evidence.items())

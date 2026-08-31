@@ -67,6 +67,7 @@ class DetectorResult:
     n_pairs_analyzed: int
     n_pairs_flagged: int
     metric_description: str
+    threshold: float = 0.60  # the detector's flag threshold at detection time
     examples: list[FlaggedExample] = field(default_factory=list)
     extra: dict[str, Any] = field(default_factory=dict)
 

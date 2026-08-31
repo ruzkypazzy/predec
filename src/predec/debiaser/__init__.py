@@ -54,7 +54,7 @@ def _reweight(
     notes: list[str] = []
 
     for det_name, det in results.items():
-        if det.score < det.flag_threshold:
+        if det.score < det.threshold:
             continue
         # Mark all pairs in this detector's flagged examples with lower weight
         flagged_ids = {ex.pair_id for ex in det.examples}
@@ -83,7 +83,7 @@ def _reswap(
 ) -> DebiasedResult:
     """For position bias: swap A/B labels on 50% of pairs at random."""
     pos = results.get("position")
-    if pos is None or pos.score < pos.flag_threshold:
+    if pos is None or pos.score < pos.threshold:
         return DebiasedResult(
             strategy="reswap",
             pairs=list(pairs),
@@ -140,7 +140,7 @@ def _filter(
     # Per-pair "bias score" = number of detectors that flagged it as an example
     bias_count: dict[str, int] = {p.id: 0 for p in pairs}
     for det in results.values():
-        if det.score < det.flag_threshold:
+        if det.score < det.threshold:
             continue
         for ex in det.examples:
             if ex.pair_id in bias_count:

@@ -34,7 +34,7 @@ def write_recommendation(
     flagged = [
         (name, d)
         for name, d in dets.items()
-        if d.score >= d.flag_threshold
+        if d.score >= d.threshold
     ]
     if not flagged:
         fallback = (
