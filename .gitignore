@@ -32,9 +32,11 @@ dist/
 *.pem
 
 # Runtime outputs (kept in eval/ and templates/, ignored elsewhere)
-runs/
 *.log
 artifacts/
+
+# Allow tracked eval results
+!runs/eval/
 
 # OS
 Thumbs.db

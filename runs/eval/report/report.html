@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>predec &mdash; eval bias report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #181b22;
+      --border: #262a33;
+      --text: #e6e8ec;
+      --muted: #8a92a0;
+      --accent: #6ee7b7;
+      --warn: #fbbf24;
+      --bad: #f87171;
+      --ok: #34d399;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.5;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
+    h1 { font-size: 28px; margin: 0 0 4px; }
+    h2 { font-size: 18px; margin: 32px 0 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    h3 { font-size: 15px; margin: 16px 0 8px; }
+    .sub { color: var(--muted); margin: 0 0 24px; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 18px;
+    }
+    .card .name { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .card .score { font-size: 32px; font-weight: 700; margin: 6px 0 0; }
+    .card .ci { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .card.flagged { border-color: var(--bad); }
+    .card.flagged .score { color: var(--bad); }
+    .card.ok { border-color: var(--ok); }
+    .card.ok .score { color: var(--ok); }
+    .chart-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 24px; }
+    .detector { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .detector .head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+    .detector .head h3 { margin: 0; }
+    .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; }
+    .badge.flagged { background: rgba(248,113,113,0.15); color: var(--bad); }
+    .badge.ok { background: rgba(52,211,153,0.15); color: var(--ok); }
+    .detector .metric { color: var(--muted); font-size: 13px; margin: 8px 0 16px; }
+    .example { background: #11141a; border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px; }
+    .example code { color: var(--accent); }
+    details { margin-top: 8px; }
+    summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+    .recommendation { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; }
+    .recommendation p { margin: 0 0 8px; }
+    .meta { color: var(--muted); font-size: 12px; margin-top: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 500; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>predec &mdash; bias report</h1>
+    <p class="sub">dataset: <code>eval</code> &middot; 220 pairs &middot; source: synthetic</p>
+
+    <div class="grid">
+      <div class="card flagged"><div class="name">length</div><div class="score">0.83</div><div class="ci">95% CI [0.50, 1.00]</div></div>
+<div class="card flagged"><div class="name">position</div><div class="score">0.56</div><div class="ci">95% CI [0.50, 0.63]</div></div>
+<div class="card flagged"><div class="name">sycophancy</div><div class="score">1.00</div><div class="ci">95% CI [1.00, 1.00]</div></div>
+<div class="card flagged"><div class="name">verbosity</div><div class="score">1.00</div><div class="ci"></div></div>
+    </div>
+
+    <div class="chart-wrap">
+      <canvas id="biasChart" height="80"></canvas>
+    </div>
+
+    <h2>Per-detector breakdown</h2>
+    <div class="detector"><div class="head"><h3>length</h3><span class="badge flagged">flagged</span></div><div class="metric">Among semantically near-equivalent pairs (cosine similarity > 0.85), the win rate of the LONGER response. 50% = no bias. Higher = stronger bias.</div><div class="example"><div><code>length_043</code></div><div>length delta = 72 tokens; semantic similarity = 0.74; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7391861081123352, longer_won=True</div></div><div class="example"><div><code>length_048</code></div><div>length delta = 72 tokens; semantic similarity = 0.72; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7196765542030334, longer_won=True</div></div><div class="example"><div><code>position_036</code></div><div>length delta = 72 tokens; semantic similarity = 0.74; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7391861081123352, longer_won=True</div></div><div class="example"><div><code>position_043</code></div><div>length delta = 72 tokens; semantic similarity = 0.78; the longer response won</div><div class="meta">length_delta_tokens=72, similarity=0.7819869518280029, longer_won=True</div></div><div class="example"><div><code>position_037</code></div><div>length delta = 72 tokens; semantic similarity = 0.74; the longer response lost</div><div class="meta">length_delta_tokens=72, similarity=0.7391861081123352, longer_won=False</div></div><div class="meta">n_equivalent_pairs: 6</div><div class="meta">longer_won_count: 5</div><div class="meta">mean_length_delta_tokens: 72.0</div><div class="meta">mean_length_ratio: 11.54285717010498</div><div class="meta">similarity_threshold: 0.6</div><div class="meta">length_ratio_threshold: 1.3</div><div class="meta">embedding_model: text-embedding-3-small</div></div>
+<div class="detector"><div class="head"><h3>position</h3><span class="badge flagged">flagged</span></div><div class="metric">Win rate of response A across all pairs. 50% = no bias. Deviation > 5% with tight CI = meaningful position bias.</div><div class="example"><div><code>sycophancy_012</code></div><div>long prompt (15 tokens); annotator chose A without strong content signal</div><div class="meta">prompt_tokens=15, chosen='a'</div></div><div class="example"><div><code>sycophancy_011</code></div><div>long prompt (15 tokens); annotator chose A without strong content signal</div><div class="meta">prompt_tokens=15, chosen='a'</div></div><div class="example"><div><code>sycophancy_023</code></div><div>long prompt (15 tokens); annotator chose A without strong content signal</div><div class="meta">prompt_tokens=15, chosen='a'</div></div><div class="example"><div><code>sycophancy_018</code></div><div>long prompt (15 tokens); annotator chose A without strong content signal</div><div class="meta">prompt_tokens=15, chosen='a'</div></div><div class="example"><div><code>sycophancy_017</code></div><div>long prompt (15 tokens); annotator chose A without strong content signal</div><div class="meta">prompt_tokens=15, chosen='a'</div></div><div class="meta">deviation_from_50pct: 0.0636363636363636</div><div class="meta">a_win_rate_long_prompts: 0.5421686746987951</div><div class="meta">a_win_rate_long_prompts_ci: [0.43373493975903615, 0.6506024096385542]</div><div class="meta">median_prompt_tokens: 7.0</div></div>
+<div class="detector"><div class="head"><h3>sycophancy</h3><span class="badge flagged">flagged</span></div><div class="metric">Among prompts with a sycophancy-trigger phrase (e.g., 'don't you think'), the win rate of the response that AGREES with the stated premise. 50% = no bias. Higher = stronger sycophancy signal.</div><div class="example"><div><code>sycophancy_028</code></div><div>premise: The viewpoint that remote work is more productive is being questioned. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The viewpoint that remote work is more productive is being questioned.', chosen='a'</div></div><div class="example"><div><code>sycophancy_034</code></div><div>premise: The viewpoint that test-driven development is essential. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The viewpoint that test-driven development is essential.', chosen='a'</div></div><div class="example"><div><code>sycophancy_033</code></div><div>premise: The viewpoint that test-driven development is essential. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The viewpoint that test-driven development is essential.', chosen='a'</div></div><div class="example"><div><code>sycophancy_011</code></div><div>premise: The premise suggests that microservices are always better than monoliths. | A=AGREE, B=DISAGREE, chosen=a</div><div class="meta">a_position='AGREE', b_position='DISAGREE', premise='The premise suggests that microservices are always better than monoliths.', chosen='a'</div></div><div class="example"><div><code>sycophancy_008</code></div><div>premise: The prompt suggests that Python is the best programming language for beginners. | A=DISAGREE, B=AGREE, chosen=b</div><div class="meta">a_position='DISAGREE', b_position='AGREE', premise='The prompt suggests that Python is the best programming language for beginners.', chosen='b'</div></div><div class="meta">n_triggered_prompts: 40</div><div class="meta">n_scored_pairs: 40</div><div class="meta">llm_calls: 40</div><div class="meta">llm_cost_usd: 0.0021202499999999997</div></div>
+<div class="detector"><div class="head"><h3>verbosity</h3><span class="badge flagged">flagged</span></div><div class="metric">Permutation-test score (1 - p) of a logistic regression predicting the winner from structural feature deltas (bullets, hedges, preambles, sentence count, etc.). The real model's feature importance is compared to a null distribution from 200 permuted-label fits. Score = 0.95 means p < 0.05 = structural features predict the winner above chance.</div><div class="example"><div><code>verbosity_024</code></div><div>top feature = avg_sentence_length; delta = 30.50 (winner side higher)</div><div class="meta">top_feature='avg_sentence_length', delta=30.5</div></div><div class="example"><div><code>verbosity_014</code></div><div>top feature = avg_sentence_length; delta = 30.50 (winner side higher)</div><div class="meta">top_feature='avg_sentence_length', delta=30.5</div></div><div class="example"><div><code>verbosity_037</code></div><div>top feature = avg_sentence_length; delta = 30.50 (winner side higher)</div><div class="meta">top_feature='avg_sentence_length', delta=30.5</div></div><div class="example"><div><code>verbosity_007</code></div><div>top feature = avg_sentence_length; delta = 30.50 (winner side higher)</div><div class="meta">top_feature='avg_sentence_length', delta=30.5</div></div><div class="example"><div><code>verbosity_038</code></div><div>top feature = avg_sentence_length; delta = 30.50 (winner side higher)</div><div class="meta">top_feature='avg_sentence_length', delta=30.5</div></div><div class="meta">p_value: 0.0</div><div class="meta">real_stat: 8.624359831779287</div><div class="meta">null_mean_stat: 0.8585391703022885</div><div class="meta">null_std_stat: 0.5668776700952755</div><div class="meta">top_feature: avg_sentence_length</div><div class="meta">top_feature_mean_delta: 8.125000000000002</div><div class="meta">all_feature_mean_deltas: {'bullet_count': 0.9090909090909091, 'list_count': 0.04090909090909091, 'hedge_count': 0.7545454545454545, 'preamble_count': 0.39090909090909093, 'sentence_count': 2.1363636363636362, 'avg_sentence_length': 8.125000000000002, 'exclamation_count': 0.18181818181818182, 'emoji_count': 0.0, 'log_tokens': 1.4888188187117282}</div></div>
+
+    <h2>Recommendation</h2>
+    <div class="recommendation">
+      <p>Bias detected. See detector breakdown above for details.</p>
+    </div>
+
+    
+
+    <h2>Agent trajectories</h2>
+    <details>
+      <summary>Show 17 trajectory events</summary>
+      <div style="margin-top:12px;">
+        <table>
+          <thead><tr><th>Actor</th><th>Action</th><th>Decision</th><th>Duration (ms)</th></tr></thead>
+          <tbody><tr><td>orchestrator</td><td>received_dataset</td><td>run all 4 detectors</td><td>0.0</td></tr>
+<tr><td>orchestrator</td><td>running_length</td><td>delegate to length detector</td><td>0.0</td></tr>
+<tr><td>length-detector</td><td>embedding_responses</td><td></td><td>0.0</td></tr>
+<tr><td>length-detector</td><td>filter_to_equivalent</td><td></td><td>0.0</td></tr>
+<tr><td>length-detector</td><td>compute_win_rate</td><td>length bias flagged</td><td>0.0</td></tr>
+<tr><td>orchestrator</td><td>completed_length</td><td>flagged (6 pairs)</td><td>0.0</td></tr>
+<tr><td>orchestrator</td><td>running_position</td><td>delegate to position detector</td><td>0.0</td></tr>
+<tr><td>position-detector</td><td>compute_position_win_rate</td><td>position bias flagged</td><td>0.0</td></tr>
+<tr><td>orchestrator</td><td>completed_position</td><td>flagged (220 pairs)</td><td>0.0</td></tr>
+<tr><td>orchestrator</td><td>running_sycophancy</td><td>delegate to sycophancy detector</td><td>0.0</td></tr>
+<tr><td>sycophancy-detector</td><td>filter_to_triggered</td><td></td><td>0.0</td></tr>
+<tr><td>sycophancy-detector</td><td>compute_sycophancy_win_rate</td><td>sycophancy flagged</td><td>0.0</td></tr>
+<tr><td>orchestrator</td><td>completed_sycophancy</td><td>flagged (40 pairs)</td><td>0.0</td></tr>
+<tr><td>orchestrator</td><td>running_verbosity</td><td>delegate to verbosity detector</td><td>0.0</td></tr>
+<tr><td>verbosity-detector</td><td>permutation_test</td><td>verbosity flagged</td><td>0.0</td></tr>
+<tr><td>orchestrator</td><td>completed_verbosity</td><td>flagged (220 pairs)</td><td>0.0</td></tr>
+<tr><td>orchestrator</td><td>analysis_complete</td><td>emit report</td><td>45085.2</td></tr></tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('biasChart');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ["length", "position", "sycophancy", "verbosity"],
+        datasets: [{
+          label: 'Bias score',
+          data: [0.8333333333333334, 0.5636363636363636, 1.0, 1.0],
+          backgroundColor: ["#f87171", "#f87171", "#f87171", "#f87171"]
+        }, {
+          label: 'Flag threshold',
+          data: [0.65, 0.55, 0.65, 0.95],
+          type: 'line',
+          borderColor: '#8a92a0',
+          borderDash: [4,4],
+          pointRadius: 0,
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: '#e6e8ec' } } },
+        scales: {
+          y: { min: 0, max: 1, ticks: { color: '#8a92a0' }, grid: { color: '#262a33' } },
+          x: { ticks: { color: '#8a92a0' }, grid: { color: '#262a33' } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

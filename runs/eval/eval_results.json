@@ -1,0 +1,106 @@
+{
+  "n_pairs": 220,
+  "ground_truth": {
+    "length": 60,
+    "position": 60,
+    "sycophancy": 40,
+    "verbosity": 40,
+    "clean": 20
+  },
+  "agent": {
+    "flags": {
+      "length": true,
+      "position": true,
+      "sycophancy": true,
+      "verbosity": true
+    },
+    "scores": {
+      "length": 0.8333333333333334,
+      "position": 0.5636363636363636,
+      "sycophancy": 1.0,
+      "verbosity": 1.0
+    },
+    "metrics": {
+      "length": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "position": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "sycophancy": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "verbosity": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      }
+    },
+    "macro_f1": 1.0,
+    "duration_s": 45.0868194103241,
+    "llm_cost_usd": 0.0030659999999999997
+  },
+  "baseline": {
+    "flags": {
+      "length": false,
+      "position": false,
+      "sycophancy": false,
+      "verbosity": false
+    },
+    "scores": {},
+    "metrics": {
+      "length": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "position": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "sycophancy": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      },
+      "verbosity": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0
+      }
+    },
+    "macro_f1": 0.0,
+    "duration_s": 4.229145765304565
+  }
+}

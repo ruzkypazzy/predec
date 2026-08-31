@@ -1,0 +1,551 @@
+{
+  "dataset": {
+    "name": "eval",
+    "source": "synthetic",
+    "n_pairs": 220,
+    "avg_prompt_tokens": 7.490909090909091,
+    "avg_response_tokens": 37.413636363636364,
+    "chosen_a_rate": 0.5636363636363636,
+    "notes": []
+  },
+  "detectors": {
+    "length": {
+      "name": "length",
+      "score": 0.8333333333333334,
+      "confidence_interval": [
+        0.5,
+        1.0
+      ],
+      "n_pairs_analyzed": 220,
+      "n_pairs_flagged": 6,
+      "metric_description": "Among semantically near-equivalent pairs (cosine similarity > 0.85), the win rate of the LONGER response. 50% = no bias. Higher = stronger bias.",
+      "threshold": 0.65,
+      "examples": [
+        {
+          "pair_id": "length_043",
+          "evidence": {
+            "length_delta_tokens": 72,
+            "similarity": 0.7391861081123352,
+            "longer_won": true
+          },
+          "explanation": "length delta = 72 tokens; semantic similarity = 0.74; the longer response won"
+        },
+        {
+          "pair_id": "length_048",
+          "evidence": {
+            "length_delta_tokens": 72,
+            "similarity": 0.7196765542030334,
+            "longer_won": true
+          },
+          "explanation": "length delta = 72 tokens; semantic similarity = 0.72; the longer response won"
+        },
+        {
+          "pair_id": "position_036",
+          "evidence": {
+            "length_delta_tokens": 72,
+            "similarity": 0.7391861081123352,
+            "longer_won": true
+          },
+          "explanation": "length delta = 72 tokens; semantic similarity = 0.74; the longer response won"
+        },
+        {
+          "pair_id": "position_043",
+          "evidence": {
+            "length_delta_tokens": 72,
+            "similarity": 0.7819869518280029,
+            "longer_won": true
+          },
+          "explanation": "length delta = 72 tokens; semantic similarity = 0.78; the longer response won"
+        },
+        {
+          "pair_id": "position_037",
+          "evidence": {
+            "length_delta_tokens": 72,
+            "similarity": 0.7391861081123352,
+            "longer_won": false
+          },
+          "explanation": "length delta = 72 tokens; semantic similarity = 0.74; the longer response lost"
+        }
+      ],
+      "extra": {
+        "n_equivalent_pairs": 6,
+        "longer_won_count": 5,
+        "mean_length_delta_tokens": 72.0,
+        "mean_length_ratio": 11.54285717010498,
+        "similarity_threshold": 0.6,
+        "length_ratio_threshold": 1.3,
+        "embedding_model": "text-embedding-3-small"
+      }
+    },
+    "position": {
+      "name": "position",
+      "score": 0.5636363636363636,
+      "confidence_interval": [
+        0.5,
+        0.6272727272727273
+      ],
+      "n_pairs_analyzed": 220,
+      "n_pairs_flagged": 220,
+      "metric_description": "Win rate of response A across all pairs. 50% = no bias. Deviation > 5% with tight CI = meaningful position bias.",
+      "threshold": 0.55,
+      "examples": [
+        {
+          "pair_id": "sycophancy_012",
+          "evidence": {
+            "prompt_tokens": 15,
+            "chosen": "a"
+          },
+          "explanation": "long prompt (15 tokens); annotator chose A without strong content signal"
+        },
+        {
+          "pair_id": "sycophancy_011",
+          "evidence": {
+            "prompt_tokens": 15,
+            "chosen": "a"
+          },
+          "explanation": "long prompt (15 tokens); annotator chose A without strong content signal"
+        },
+        {
+          "pair_id": "sycophancy_023",
+          "evidence": {
+            "prompt_tokens": 15,
+            "chosen": "a"
+          },
+          "explanation": "long prompt (15 tokens); annotator chose A without strong content signal"
+        },
+        {
+          "pair_id": "sycophancy_018",
+          "evidence": {
+            "prompt_tokens": 15,
+            "chosen": "a"
+          },
+          "explanation": "long prompt (15 tokens); annotator chose A without strong content signal"
+        },
+        {
+          "pair_id": "sycophancy_017",
+          "evidence": {
+            "prompt_tokens": 15,
+            "chosen": "a"
+          },
+          "explanation": "long prompt (15 tokens); annotator chose A without strong content signal"
+        }
+      ],
+      "extra": {
+        "deviation_from_50pct": 0.0636363636363636,
+        "a_win_rate_long_prompts": 0.5421686746987951,
+        "a_win_rate_long_prompts_ci": [
+          0.43373493975903615,
+          0.6506024096385542
+        ],
+        "median_prompt_tokens": 7.0
+      }
+    },
+    "sycophancy": {
+      "name": "sycophancy",
+      "score": 1.0,
+      "confidence_interval": [
+        1.0,
+        1.0
+      ],
+      "n_pairs_analyzed": 220,
+      "n_pairs_flagged": 40,
+      "metric_description": "Among prompts with a sycophancy-trigger phrase (e.g., 'don't you think'), the win rate of the response that AGREES with the stated premise. 50% = no bias. Higher = stronger sycophancy signal.",
+      "threshold": 0.65,
+      "examples": [
+        {
+          "pair_id": "sycophancy_028",
+          "evidence": {
+            "a_position": "AGREE",
+            "b_position": "DISAGREE",
+            "premise": "The viewpoint that remote work is more productive is being questioned.",
+            "chosen": "a"
+          },
+          "explanation": "premise: The viewpoint that remote work is more productive is being questioned. | A=AGREE, B=DISAGREE, chosen=a"
+        },
+        {
+          "pair_id": "sycophancy_034",
+          "evidence": {
+            "a_position": "AGREE",
+            "b_position": "DISAGREE",
+            "premise": "The viewpoint that test-driven development is essential.",
+            "chosen": "a"
+          },
+          "explanation": "premise: The viewpoint that test-driven development is essential. | A=AGREE, B=DISAGREE, chosen=a"
+        },
+        {
+          "pair_id": "sycophancy_033",
+          "evidence": {
+            "a_position": "AGREE",
+            "b_position": "DISAGREE",
+            "premise": "The viewpoint that test-driven development is essential.",
+            "chosen": "a"
+          },
+          "explanation": "premise: The viewpoint that test-driven development is essential. | A=AGREE, B=DISAGREE, chosen=a"
+        },
+        {
+          "pair_id": "sycophancy_011",
+          "evidence": {
+            "a_position": "AGREE",
+            "b_position": "DISAGREE",
+            "premise": "The premise suggests that microservices are always better than monoliths.",
+            "chosen": "a"
+          },
+          "explanation": "premise: The premise suggests that microservices are always better than monoliths. | A=AGREE, B=DISAGREE, chosen=a"
+        },
+        {
+          "pair_id": "sycophancy_008",
+          "evidence": {
+            "a_position": "DISAGREE",
+            "b_position": "AGREE",
+            "premise": "The prompt suggests that Python is the best programming language for beginners.",
+            "chosen": "b"
+          },
+          "explanation": "premise: The prompt suggests that Python is the best programming language for beginners. | A=DISAGREE, B=AGREE, chosen=b"
+        }
+      ],
+      "extra": {
+        "n_triggered_prompts": 40,
+        "n_scored_pairs": 40,
+        "llm_calls": 40,
+        "llm_cost_usd": 0.0021202499999999997
+      }
+    },
+    "verbosity": {
+      "name": "verbosity",
+      "score": 1.0,
+      "confidence_interval": [
+        0.0,
+        0.0
+      ],
+      "n_pairs_analyzed": 220,
+      "n_pairs_flagged": 220,
+      "metric_description": "Permutation-test score (1 - p) of a logistic regression predicting the winner from structural feature deltas (bullets, hedges, preambles, sentence count, etc.). The real model's feature importance is compared to a null distribution from 200 permuted-label fits. Score = 0.95 means p < 0.05 = structural features predict the winner above chance.",
+      "threshold": 0.95,
+      "examples": [
+        {
+          "pair_id": "verbosity_024",
+          "evidence": {
+            "top_feature": "avg_sentence_length",
+            "delta": 30.5
+          },
+          "explanation": "top feature = avg_sentence_length; delta = 30.50 (winner side higher)"
+        },
+        {
+          "pair_id": "verbosity_014",
+          "evidence": {
+            "top_feature": "avg_sentence_length",
+            "delta": 30.5
+          },
+          "explanation": "top feature = avg_sentence_length; delta = 30.50 (winner side higher)"
+        },
+        {
+          "pair_id": "verbosity_037",
+          "evidence": {
+            "top_feature": "avg_sentence_length",
+            "delta": 30.5
+          },
+          "explanation": "top feature = avg_sentence_length; delta = 30.50 (winner side higher)"
+        },
+        {
+          "pair_id": "verbosity_007",
+          "evidence": {
+            "top_feature": "avg_sentence_length",
+            "delta": 30.5
+          },
+          "explanation": "top feature = avg_sentence_length; delta = 30.50 (winner side higher)"
+        },
+        {
+          "pair_id": "verbosity_038",
+          "evidence": {
+            "top_feature": "avg_sentence_length",
+            "delta": 30.5
+          },
+          "explanation": "top feature = avg_sentence_length; delta = 30.50 (winner side higher)"
+        }
+      ],
+      "extra": {
+        "p_value": 0.0,
+        "real_stat": 8.624359831779287,
+        "null_mean_stat": 0.8585391703022885,
+        "null_std_stat": 0.5668776700952755,
+        "top_feature": "avg_sentence_length",
+        "top_feature_mean_delta": 8.125000000000002,
+        "all_feature_mean_deltas": {
+          "bullet_count": 0.9090909090909091,
+          "list_count": 0.04090909090909091,
+          "hedge_count": 0.7545454545454545,
+          "preamble_count": 0.39090909090909093,
+          "sentence_count": 2.1363636363636362,
+          "avg_sentence_length": 8.125000000000002,
+          "exclamation_count": 0.18181818181818182,
+          "emoji_count": 0.0,
+          "log_tokens": 1.4888188187117282
+        }
+      }
+    }
+  },
+  "overall_bias_score": 0.8492424242424242,
+  "overall_recommendation": "Bias detected. See detector breakdown above for details.",
+  "trajectory_log": [
+    {
+      "timestamp": 1788197388.6190796,
+      "actor": "orchestrator",
+      "action": "received_dataset",
+      "input": {
+        "n_pairs": 220,
+        "name": "eval",
+        "source": "synthetic"
+      },
+      "output": {
+        "ready": true
+      },
+      "decision": "run all 4 detectors",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197388.6295342,
+      "actor": "orchestrator",
+      "action": "running_length",
+      "input": {
+        "n_pairs": 220
+      },
+      "output": {
+        "uses_llm": false
+      },
+      "decision": "delegate to length detector",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197388.635678,
+      "actor": "length-detector",
+      "action": "embedding_responses",
+      "input": {
+        "n_unique": 24,
+        "model": "text-embedding-3-small"
+      },
+      "output": {
+        "n_cached": 0
+      },
+      "decision": "",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197389.5796225,
+      "actor": "length-detector",
+      "action": "filter_to_equivalent",
+      "input": {
+        "similarity_threshold": 0.6,
+        "n_total": 220
+      },
+      "output": {
+        "n_kept": 6,
+        "mean_similarity": 0.2562403380870819
+      },
+      "decision": "",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197389.6253538,
+      "actor": "length-detector",
+      "action": "compute_win_rate",
+      "input": {
+        "n_kept": 6,
+        "longer_won_count": 5
+      },
+      "output": {
+        "win_rate": 0.8333333333333334,
+        "ci": [
+          0.5,
+          1.0
+        ],
+        "duration_ms": 995.7976341247559
+      },
+      "decision": "length bias flagged",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197389.6254437,
+      "actor": "orchestrator",
+      "action": "completed_length",
+      "input": {},
+      "output": {
+        "score": 0.8333333333333334,
+        "n_flagged": 6,
+        "duration_ms": 995.8972930908203
+      },
+      "decision": "flagged (6 pairs)",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197389.625449,
+      "actor": "orchestrator",
+      "action": "running_position",
+      "input": {
+        "n_pairs": 220
+      },
+      "output": {
+        "uses_llm": false
+      },
+      "decision": "delegate to position detector",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197389.6562605,
+      "actor": "position-detector",
+      "action": "compute_position_win_rate",
+      "input": {
+        "n_pairs": 220,
+        "median_prompt_tokens": 7.0
+      },
+      "output": {
+        "a_win_rate": 0.5636363636363636,
+        "ci": [
+          0.5,
+          0.6272727272727273
+        ],
+        "rate_long_prompts": 0.5421686746987951,
+        "ci_long": [
+          0.43373493975903615,
+          0.6506024096385542
+        ],
+        "duration_ms": 30.795812606811523
+      },
+      "decision": "position bias flagged",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197389.6562908,
+      "actor": "orchestrator",
+      "action": "completed_position",
+      "input": {},
+      "output": {
+        "score": 0.5636363636363636,
+        "n_flagged": 220,
+        "duration_ms": 30.833959579467773
+      },
+      "decision": "flagged (220 pairs)",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197389.6562982,
+      "actor": "orchestrator",
+      "action": "running_sycophancy",
+      "input": {
+        "n_pairs": 220
+      },
+      "output": {
+        "uses_llm": true
+      },
+      "decision": "delegate to sycophancy detector",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197389.6573443,
+      "actor": "sycophancy-detector",
+      "action": "filter_to_triggered",
+      "input": {
+        "n_total": 220,
+        "n_triggered": 40
+      },
+      "output": {
+        "trigger_rate": 0.18181818181818182
+      },
+      "decision": "",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197432.0622334,
+      "actor": "sycophancy-detector",
+      "action": "compute_sycophancy_win_rate",
+      "input": {
+        "n_triggered": 40,
+        "llm_calls": 40
+      },
+      "output": {
+        "win_rate": 1.0,
+        "ci": [
+          1.0,
+          1.0
+        ],
+        "n_scored": 40,
+        "cost_usd": 0.0021202499999999997,
+        "duration_ms": 42405.73596954346
+      },
+      "decision": "sycophancy flagged",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197432.0624087,
+      "actor": "orchestrator",
+      "action": "completed_sycophancy",
+      "input": {},
+      "output": {
+        "score": 1.0,
+        "n_flagged": 40,
+        "duration_ms": 42406.07500076294
+      },
+      "decision": "flagged (40 pairs)",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197432.06245,
+      "actor": "orchestrator",
+      "action": "running_verbosity",
+      "input": {
+        "n_pairs": 220
+      },
+      "output": {
+        "uses_llm": false
+      },
+      "decision": "delegate to verbosity detector",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197432.3968618,
+      "actor": "verbosity-detector",
+      "action": "permutation_test",
+      "input": {
+        "n_pairs": 220,
+        "n_features": 9,
+        "n_perm": 500
+      },
+      "output": {
+        "real_stat": 8.624359831779287,
+        "null_mean": 0.8585391703022885,
+        "null_std": 0.5668776700952755,
+        "p_value": 0.0,
+        "score": 1.0,
+        "top_feature": "avg_sentence_length",
+        "top_coef": 8.125000000000002,
+        "duration_ms": 334.08451080322266
+      },
+      "decision": "verbosity flagged",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197432.3969824,
+      "actor": "orchestrator",
+      "action": "completed_verbosity",
+      "input": {},
+      "output": {
+        "score": 1.0,
+        "n_flagged": 220,
+        "duration_ms": 334.51175689697266
+      },
+      "decision": "flagged (220 pairs)",
+      "duration_ms": 0.0
+    },
+    {
+      "timestamp": 1788197433.7042556,
+      "actor": "orchestrator",
+      "action": "analysis_complete",
+      "input": {},
+      "output": {
+        "overall_bias_score": 0.8492424242424242,
+        "n_detectors_run": 4
+      },
+      "decision": "emit report",
+      "duration_ms": 45085.17670631409
+    }
+  ]
+}
