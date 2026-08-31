@@ -11,6 +11,7 @@ from typing import Any
 
 from ..llm.client import LLMClient
 from ..schema import AnalysisReport
+from ..trajectory.logger import TrajectoryLogger
 
 
 SYSTEM_PROMPT = """You are a concise, technical analyst writing the executive summary of a bias
@@ -27,6 +28,7 @@ Tone: direct, technical, no hedging. Output strict JSON only.
 def write_recommendation(
     report: AnalysisReport,
     llm: LLMClient | None = None,
+    trajectory: TrajectoryLogger | None = None,
 ) -> tuple[str, dict[str, Any]]:
     """Return (recommendation_text, llm_call_record). Falls back to a templated
     string if no LLM is available."""
@@ -42,6 +44,13 @@ def write_recommendation(
             f"The dataset appears safe for reward model training as-is. "
             f"Re-run predec if the data source changes."
         )
+        if trajectory is not None:
+            trajectory.record(
+                actor="report-writer",
+                action="wrote_templated_recommendation",
+                input={"n_flagged": 0},
+                output={"fallback_used": True, "recommendation": fallback[:80] + "..."},
+            )
         return fallback, {}
 
     # Sort flagged detectors by score
@@ -71,8 +80,15 @@ def write_recommendation(
         else:
             fallback = (
                 f"Verbosity bias detected: structural markers (bullets, hedges, preambles) predict "
-                f"preferences with AUC {worst.score:.2f}. Recommendation: reweight or filter, and "
+                f"preferences with permutation p-value of {worst.score:.2f}. Recommendation: reweight or filter, and "
                 f"audit annotator guidelines for explicit 'do not reward verbosity' rules."
+            )
+        if trajectory is not None:
+            trajectory.record(
+                actor="report-writer",
+                action="wrote_templated_recommendation",
+                input={"worst_detector": worst_name, "worst_score": worst.score},
+                output={"fallback_used": True, "recommendation": fallback[:80] + "..."},
             )
         return fallback, {}
 
@@ -99,8 +115,24 @@ def write_recommendation(
         max_tokens=400,
     )
     if call.response_json is None or "recommendation" not in call.response_json:
-        return "Bias detected. See detector breakdown above for details.", call.to_dict() if hasattr(call, "to_dict") else {}
-    return call.response_json["recommendation"], {
+        return "Bias detected. See detector breakdown above for details.", {
+            "actor": call.actor,
+            "purpose": call.purpose,
+            "model": call.model,
+            "input_tokens": call.input_tokens,
+            "output_tokens": call.output_tokens,
+            "cost_usd": call.cost_usd,
+            "duration_ms": call.duration_ms,
+        }
+    rec = call.response_json["recommendation"]
+    if trajectory is not None:
+        trajectory.record(
+            actor="report-writer",
+            action="wrote_llm_recommendation",
+            input={"model": call.model, "input_tokens": call.input_tokens},
+            output={"recommendation": rec[:80] + "...", "cost_usd": call.cost_usd},
+        )
+    return rec, {
         "actor": call.actor,
         "purpose": call.purpose,
         "model": call.model,

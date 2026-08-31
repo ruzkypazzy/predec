@@ -29,7 +29,6 @@ _HTML_TEMPLATE = """<!doctype html>
   <meta charset="utf-8">
   <title>predec &mdash; {dataset_name} bias report</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {{
       --bg: #0f1115;
@@ -65,6 +64,12 @@ _HTML_TEMPLATE = """<!doctype html>
     .card.ok {{ border-color: var(--ok); }}
     .card.ok .score {{ color: var(--ok); }}
     .chart-wrap {{ background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 24px; }}
+    .bar-row {{ display: grid; grid-template-columns: 110px 1fr 60px; align-items: center; gap: 12px; margin: 10px 0; }}
+    .bar-row .label {{ color: var(--muted); font-size: 13px; }}
+    .bar-row .bar-track {{ position: relative; height: 18px; background: #11141a; border-radius: 9px; overflow: hidden; }}
+    .bar-row .bar-fill {{ position: absolute; left: 0; top: 0; bottom: 0; }}
+    .bar-row .bar-threshold {{ position: absolute; top: -2px; bottom: -2px; width: 2px; background: #8a92a0; }}
+    .bar-row .bar-value {{ text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }}
     .detector {{ background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 16px; }}
     .detector .head {{ display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }}
     .detector .head h3 {{ margin: 0; }}
@@ -95,7 +100,8 @@ _HTML_TEMPLATE = """<!doctype html>
     </div>
 
     <div class="chart-wrap">
-      <canvas id="biasChart" height="80"></canvas>
+      <h3 style="margin-top:0;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;font-size:12px;">Bias scores vs flag thresholds</h3>
+      {bar_rows}
     </div>
 
     <h2>Per-detector breakdown</h2>
@@ -119,37 +125,6 @@ _HTML_TEMPLATE = """<!doctype html>
       </div>
     </details>
   </div>
-
-  <script>
-    const ctx = document.getElementById('biasChart');
-    new Chart(ctx, {{
-      type: 'bar',
-      data: {{
-        labels: {chart_labels},
-        datasets: [{{
-          label: 'Bias score',
-          data: {chart_values},
-          backgroundColor: {chart_colors}
-        }}, {{
-          label: 'Flag threshold',
-          data: {chart_thresholds},
-          type: 'line',
-          borderColor: '#8a92a0',
-          borderDash: [4,4],
-          pointRadius: 0,
-          fill: false
-        }}]
-      }},
-      options: {{
-        responsive: true,
-        plugins: {{ legend: {{ labels: {{ color: '#e6e8ec' }} }} }},
-        scales: {{
-          y: {{ min: 0, max: 1, ticks: {{ color: '#8a92a0' }}, grid: {{ color: '#262a33' }} }},
-          x: {{ ticks: {{ color: '#8a92a0' }}, grid: {{ color: '#262a33' }} }}
-        }}
-      }}
-    }});
-  </script>
 </body>
 </html>
 """
@@ -190,14 +165,24 @@ def render_html(report: AnalysisReport, debiased_path: str | None = None) -> str
             f"</div>"
         )
 
-    # Chart data
-    chart_labels = list(dets.keys())
-    chart_values = [float(dets[k].score) for k in chart_labels]
-    chart_thresholds = [float(dets[k].threshold) for k in chart_labels]
-    chart_colors = [
-        "#f87171" if dets[k].score >= dets[k].threshold else "#34d399"
-        for k in chart_labels
-    ]
+    # Chart data: build the bar chart rows (self-contained, no JS deps)
+    bar_rows_parts = []
+    for name, d in dets.items():
+        flagged = d.score >= d.threshold
+        color = "#f87171" if flagged else "#34d399"
+        score_pct = float(d.score) * 100
+        thresh_pct = float(d.threshold) * 100
+        bar_rows_parts.append(
+            f'<div class="bar-row">'
+            f'<div class="label">{name}</div>'
+            f'<div class="bar-track">'
+            f'<div class="bar-fill" style="width:{score_pct:.1f}%;background:{color};"></div>'
+            f'<div class="bar-threshold" style="left:{thresh_pct:.1f}%;" title="threshold {d.threshold:.2f}"></div>'
+            f'</div>'
+            f'<div class="bar-value">{d.score:.2f}</div>'
+            f'</div>'
+        )
+    bar_rows = "\n".join(bar_rows_parts)
 
     # Per-detector sections
     sections = []
@@ -254,15 +239,12 @@ def render_html(report: AnalysisReport, debiased_path: str | None = None) -> str
         dataset_source=ds.source,
         n_pairs=ds.n_pairs,
         cards="\n".join(cards),
+        bar_rows=bar_rows,
         detector_sections="\n".join(sections),
         recommendation=report.overall_recommendation,
         debiased_section=debiased_section,
         n_trajectory=len(traj),
         trajectory_rows="\n".join(rows),
-        chart_labels=json.dumps(chart_labels),
-        chart_values=json.dumps(chart_values),
-        chart_thresholds=json.dumps(chart_thresholds),
-        chart_colors=json.dumps(chart_colors),
     )
 
 

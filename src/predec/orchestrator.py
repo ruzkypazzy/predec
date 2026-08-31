@@ -143,6 +143,7 @@ def run_analysis(
             trajectory_log=log.to_list(),
         ),
         llm=llm,
+        trajectory=log,
     )
     if rec_call:
         log.record(
