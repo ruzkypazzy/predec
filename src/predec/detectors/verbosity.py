@@ -117,38 +117,37 @@ class VerbosityDetector(BaseDetector):
         X[win_idx == 1] = -X[win_idx == 1]
         y = np.ones(n, dtype=np.int8)
 
-        # Step 3: use a permutation test on the L1 norm of standardized
-        # feature deltas. This is a paired test (no y needed): the null
-        # hypothesis is that the winner's side has the same mean feature
-        # vector as the loser's. We compute the observed L1 norm of the
-        # mean delta and compare to a null built by flipping the sign of
-        # random subsets of rows.
+        # Step 3: permutation test on the L2 norm of the mean feature
+        # delta vector. The test statistic is the magnitude of the
+        # AVERAGE signed delta across all pairs. Under the null hypothesis
+        # ("the winner's side has no consistent feature advantage"),
+        # flipping the sign of random subsets of rows should give
+        # statistics distributed around 0. A real bias shows up as a
+        # non-zero mean vector.
         mu = X.mean(axis=0)
         sd = X.std(axis=0) + 1e-9
         X_std = (X - mu) / sd
 
-        # Real test statistic: mean absolute standardized feature delta
-        real_stat = float(np.mean(np.abs(X_std)))
+        # Real test statistic: L2 norm of the mean vector
+        mean_vec = X_std.mean(axis=0)
+        real_stat = float(np.linalg.norm(mean_vec))
 
-        # Permutation null: flip the sign of random subsets of rows.
-        # This breaks any consistent directionality between "winner side"
-        # and feature values while preserving the per-pair magnitude.
+        # Permutation null: flip the sign of random subsets of rows
         rng = np.random.default_rng(42)
         n_perm = 500
         null_stats = np.empty(n_perm, dtype=np.float64)
         for i in range(n_perm):
             signs = rng.choice([-1.0, 1.0], size=n)
             X_perm = X_std * signs[:, None]
-            null_stats[i] = float(np.mean(np.abs(X_perm)))
+            null_stats[i] = float(np.linalg.norm(X_perm.mean(axis=0)))
         p_value = float((null_stats >= real_stat).mean())
         # Score: 1 - p. Higher = stronger verbosity bias.
         score = 1.0 - p_value
 
         # Step 4: top feature (by mean absolute delta on real data)
-        mean_abs = np.abs(X_std).mean(axis=0)
-        top_idx = int(np.argmax(mean_abs))
+        top_idx = int(np.argmax(np.abs(mean_vec)))
         top_feature = FEATURE_NAMES[top_idx]
-        top_coef = float(np.mean(X_std[:, top_idx]))  # mean signed delta
+        top_coef = float(mean_vec[top_idx])
 
         # Step 5: examples — pairs where the top feature delta is largest
         top_col = X[:, top_idx]
@@ -204,7 +203,7 @@ class VerbosityDetector(BaseDetector):
                 "top_feature": top_feature,
                 "top_feature_mean_delta": top_coef,
                 "all_feature_mean_deltas": {
-                    f: float(np.mean(X_std[:, i])) for i, f in enumerate(FEATURE_NAMES)
+                    f: float(mean_vec[i]) for i, f in enumerate(FEATURE_NAMES)
                 },
             },
         )
